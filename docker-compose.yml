@@ -1,0 +1,58 @@
+version: '3.3'
+
+services:
+  bot:
+    build: .
+    environment:
+      - API_TOKEN=%your_token%
+      - DB_ENGINE=postgresql
+      - DB_USER=%your_user%
+      - DB_PASSWORD=%your_password%
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=%your_db%
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAX_TRIES=2
+      - PING_PERIOD=60
+      - RETRY_PERIOD=30
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app/
+
+  celery_worker:
+    build: .
+    command: python -m celery -A main worker --scheduler main -l info
+    depends_on:
+      - bot
+      - redis
+    volumes:
+      - .:/app/
+
+  celery_beat:
+    build: .
+    command: python -m celery -A main beat -l info
+    depends_on:
+      - bot
+      - redis
+    volumes:
+      - .:/app/
+
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=%your_user%
+      - POSTGRES_PASSWORD=%your_password%
+      - POSTGRES_DB=%your_db%
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+  redis:
+    image: redis:latest
+
+volumes:
+  db_data:
+  .:

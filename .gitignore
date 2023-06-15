@@ -1,0 +1,10 @@
+/venv/
+/__pycache__
+/.pytest_cache
+/.idea
+/config/__pycache__
+/tests/__pycache__
+celerybeat-schedule.bak
+celerybeat-schedule.dat
+celerybeat-schedule.dir
+
